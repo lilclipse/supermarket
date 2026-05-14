@@ -43,7 +43,7 @@ class BaseTemplate
             <meta charset='UTF-8'>
             <meta name='viewport' content='width=device-width, initial-scale=1.0'>
             <title>{$title}</title>
-            <link rel='stylesheet' href='/supermarket/assets/css/style_dark.css'>
+            <link rel='stylesheet' href='/supermarket/assets/css/style_dark_catalog.css'>
         </head>
         <body>
             <header class='topbar'>
