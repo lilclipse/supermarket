@@ -1,0 +1,20 @@
+<svg width="512" height="512" viewBox="0 0 512 512" fill="none" xmlns="http://www.w3.org/2000/svg">
+  <rect width="512" height="512" rx="128" fill="#0F0F10"/>
+  <circle cx="256" cy="256" r="190" fill="url(#g1)" opacity="0.95"/>
+  <path d="M154 254C154 238.536 166.536 226 182 226H330C345.464 226 358 238.536 358 254V314C358 347.137 331.137 374 298 374H214C180.863 374 154 347.137 154 314V254Z" fill="#1E1E22" stroke="#83D96A" stroke-width="14"/>
+  <path d="M176 225C188 173 231 143 256 143C281 143 324 173 336 225" stroke="#83D96A" stroke-width="18" stroke-linecap="round"/>
+  <circle cx="214" cy="292" r="36" fill="#FF5A5F"/>
+  <path d="M204 249C210 224 232 213 252 216C237 229 231 245 231 259C222 252 214 249 204 249Z" fill="#4CD964"/>
+  <circle cx="292" cy="292" r="36" fill="#FFD166"/>
+  <path d="M288 247C305 222 333 218 354 231C327 236 313 252 307 267C302 257 297 251 288 247Z" fill="#4CD964"/>
+  <path d="M251 264C260 224 294 201 329 209C309 229 305 252 308 275C290 263 270 258 251 264Z" fill="#2ECC71"/>
+  <path d="M188 374H324" stroke="#0071E3" stroke-width="18" stroke-linecap="round"/>
+  <text x="256" y="440" text-anchor="middle" font-family="Arial, sans-serif" font-size="52" font-weight="800" fill="#FFFFFF">ОД</text>
+  <defs>
+    <radialGradient id="g1" cx="0" cy="0" r="1" gradientUnits="userSpaceOnUse" gradientTransform="translate(174 126) rotate(55.8) scale(338)">
+      <stop stop-color="#123B63"/>
+      <stop offset="0.55" stop-color="#1F1F22"/>
+      <stop offset="1" stop-color="#0F0F10"/>
+    </radialGradient>
+  </defs>
+</svg>
