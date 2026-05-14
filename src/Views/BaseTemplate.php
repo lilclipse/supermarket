@@ -6,39 +6,52 @@ class BaseTemplate
 {
     public static function render(string $title, string $content): string
     {
-        return "
-        <!DOCTYPE html>
-        <html lang='ru'>
-        <head>
-            <meta charset='UTF-8'>
-            <meta name='viewport' content='width=device-width, initial-scale=1.0'>
-            <title>{$title}</title>
+        $cartCount = 0;
+        if (isset($_SESSION['cart']) && is_array($_SESSION['cart'])) {
+            $cartCount = array_sum($_SESSION['cart']);
+        }
 
-            <link rel='stylesheet' href='/supermarket/assets/css/style.css'>
-        </head>
+        $flash = '';
+        if (isset($_SESSION['flash'])) {
+            $message = htmlspecialchars($_SESSION['flash'], ENT_QUOTES, 'UTF-8');
+            $flash = "<div class='flash'>{$message}</div>";
+            unset($_SESSION['flash']);
+        }
 
-        <body>
+        return "<!DOCTYPE html>
+<html lang='ru'>
+<head>
+    <meta charset='UTF-8'>
+    <meta name='viewport' content='width=device-width, initial-scale=1.0'>
+    <title>{$title}</title>
+    <link rel='stylesheet' href='assets/css/style.css'>
+</head>
+<body>
+    <header class='site-header'>
+        <a class='logo' href='index.php'>
+            <span class='logo-mark'>S</span>
+            <span>Supermarket</span>
+        </a>
 
-            <header>
-                <h1>ИС «Супермаркет»</h1>
+        <nav class='nav'>
+            <a href='index.php'>Главная</a>
+            <a href='index.php?page=products'>Каталог</a>
+            <a href='index.php?page=basket'>Корзина <span class='badge'>{$cartCount}</span></a>
+            <a href='index.php?page=about'>О проекте</a>
+        </nav>
+    </header>
 
-                <nav>
-                    <a href='/supermarket/'>Главная</a>
-                    <a href='/supermarket/products'>Каталог</a>
-                    <a href='/supermarket/about'>О нас</a>
-                </nav>
-            </header>
+    {$flash}
 
-            <main>
-                {$content}
-            </main>
+    <main class='page'>
+        {$content}
+    </main>
 
-            <footer>
-                © 2026 ИС «Супермаркет»
-            </footer>
-
-        </body>
-        </html>
-        ";
+    <footer class='footer'>
+        <span>© 2026 ИС «Супермаркет»</span>
+        <span>Учебный PHP MVC-проект</span>
+    </footer>
+</body>
+</html>";
     }
 }

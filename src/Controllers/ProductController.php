@@ -3,45 +3,58 @@
 namespace App\Controllers;
 
 use App\Views\BaseTemplate;
+use App\Configs\Config;
 
 class ProductController
 {
     public function get(): string
     {
-        $content = "
-            <h2>Каталог товаров</h2>
+        $pdo = Config::getPDO();
+        $stmt = $pdo->query("SELECT * FROM products");
+        $products = $stmt->fetchAll();
 
-            <div class='products'>
-                <div class='card'>
-                    <h3>Молоко</h3>
-                    <p>Молоко 3.2%, 1 литр</p>
-                    <p><b>Цена:</b> 89 ₽</p>
-                    <a class='btn' href='#'>Добавить в корзину</a>
+        $icons = [
+            "Молочные продукты" => "🥛",
+            "Выпечка" => "🍞",
+            "Фрукты" => "🍎",
+            "Мясо и птица" => "🍗",
+            "Овощи" => "🥔",
+            "Напитки" => "🧃",
+            "Бакалея" => "🍝"
+        ];
+
+        $content = "<section class='catalog'>";
+        $content .= "<h2>Каталог продуктов</h2>";
+        $content .= "<div class='products'>";
+
+        foreach ($products as $product) {
+            $name = htmlspecialchars($product['name']);
+            $category = htmlspecialchars($product['category']);
+            $description = htmlspecialchars($product['description']);
+            $price = number_format($product['price'], 0, '.', ' ');
+            $icon = $icons[$product['category']] ?? "🛒";
+
+            $content .= "
+                <div class='product-card'>
+                    <div class='product-preview'>
+                        <span>{$icon}</span>
+                    </div>
+
+                    <div class='product-category'>{$category}</div>
+                    <h3>{$name}</h3>
+                    <p>{$description}</p>
+
+                    <div class='product-bottom'>
+                        <strong>{$price} ₽</strong>
+                        <a class='btn' href='/supermarket/index.php?page=basket_add&id={$product['id']}'>В корзину</a>
+                    </div>
                 </div>
+            ";
+        }
 
-                <div class='card'>
-                    <h3>Хлеб</h3>
-                    <p>Хлеб пшеничный свежий</p>
-                    <p><b>Цена:</b> 45 ₽</p>
-                    <a class='btn' href='#'>Добавить в корзину</a>
-                </div>
+        $content .= "</div>";
+        $content .= "</section>";
 
-                <div class='card'>
-                    <h3>Яблоки</h3>
-                    <p>Яблоки красные, 1 кг</p>
-                    <p><b>Цена:</b> 120 ₽</p>
-                    <a class='btn' href='#'>Добавить в корзину</a>
-                </div>
-
-                <div class='card'>
-                    <h3>Сыр</h3>
-                    <p>Сыр Российский, 200 г</p>
-                    <p><b>Цена:</b> 180 ₽</p>
-                    <a class='btn' href='#'>Добавить в корзину</a>
-                </div>
-            </div>
-        ";
-
-        return BaseTemplate::render("Каталог товаров", $content);
+        return BaseTemplate::render("Каталог", $content);
     }
 }
