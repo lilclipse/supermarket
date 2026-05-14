@@ -49,7 +49,7 @@ class BaseTemplate
         <body>
             <header class='topbar'>
                 <a class='brand' href='/supermarket/index.php'>
-                    <img class='brand-logo' src='/supermarket/assets/img/ovoshnoi-dvizh-logo.svg' alt='Овощной Движ'>
+                    <span class='logo'>ОД</span>
                     <span>Овощной Движ</span>
                 </a>
 
