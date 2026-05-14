@@ -8,16 +8,21 @@ body {
     background: #0f0f10;
     color: #f5f5f7;
     font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Arial, sans-serif;
+    overflow-x: hidden;
 }
 
 .topbar,
 header {
     background: rgba(29, 29, 31, 0.96);
     border-bottom: 1px solid rgba(255, 255, 255, 0.08);
-    padding: 18px 8%;
+    padding: 16px 8%;
     position: sticky;
     top: 0;
     z-index: 20;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 28px;
 }
 
 .brand,
@@ -31,7 +36,7 @@ header {
     display: inline-flex;
     align-items: center;
     gap: 10px;
-    margin-bottom: 12px;
+    flex: 0 0 auto;
 }
 
 .logo {
@@ -48,7 +53,8 @@ header {
 nav {
     display: flex;
     align-items: center;
-    gap: 24px;
+    justify-content: flex-end;
+    gap: 22px;
     flex-wrap: wrap;
 }
 
@@ -57,6 +63,7 @@ nav a {
     text-decoration: none;
     font-size: 15px;
     opacity: 0.86;
+    white-space: nowrap;
 }
 
 nav a:hover {
@@ -76,17 +83,37 @@ main {
     display: block;
 }
 
-.catalog-head {
-    margin-bottom: 32px;
+.hero {
+    width: 100%;
+    min-height: 420px;
+    border-radius: 36px;
+    padding: 72px 64px;
+    background: radial-gradient(circle at 20% 10%, rgba(0, 113, 227, 0.28), transparent 34%),
+                radial-gradient(circle at 80% 0%, rgba(88, 86, 214, 0.22), transparent 32%),
+                linear-gradient(180deg, #242426 0%, #19191b 100%);
+    border: 1px solid rgba(255, 255, 255, 0.08);
+    box-shadow: 0 28px 90px rgba(0, 0, 0, 0.45);
+    display: flex;
+    flex-direction: column;
+    align-items: flex-start;
+    justify-content: center;
+    overflow: hidden;
+}
+
+.eyebrow {
+    color: #b8b8bf;
+    margin: 0 0 16px;
+    font-size: 17px;
 }
 
 .catalog-head h1,
 .hero h1,
 .hero h2 {
-    font-size: 48px;
-    line-height: 1.05;
-    letter-spacing: -1.5px;
-    margin: 0 0 16px;
+    font-size: clamp(38px, 5vw, 66px);
+    line-height: 1.03;
+    letter-spacing: -2px;
+    margin: 0 0 18px;
+    max-width: 980px;
 }
 
 .catalog-head p,
@@ -96,13 +123,26 @@ main {
     line-height: 1.55;
 }
 
-.products {
-    display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
-    gap: 24px;
-    align-items: stretch;
+.hero > p:not(.eyebrow) {
+    max-width: 760px;
+    font-size: 19px;
+    margin: 0 0 26px;
 }
 
+.hero-actions {
+    display: flex;
+    gap: 14px;
+    flex-wrap: wrap;
+}
+
+.features {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 24px;
+    margin-top: 28px;
+}
+
+.feature-card,
 .product-card,
 .card,
 .panel,
@@ -116,6 +156,32 @@ main {
     box-shadow: 0 24px 70px rgba(0, 0, 0, 0.32);
 }
 
+.feature-card span {
+    font-size: 34px;
+}
+
+.feature-card h3 {
+    margin: 16px 0 10px;
+    font-size: 22px;
+}
+
+.feature-card p {
+    color: #b8b8bf;
+    line-height: 1.55;
+    margin: 0;
+}
+
+.catalog-head {
+    margin-bottom: 32px;
+}
+
+.products {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+    gap: 24px;
+    align-items: stretch;
+}
+
 .product-card {
     min-height: 360px;
     display: flex;
@@ -123,7 +189,8 @@ main {
     transition: transform 0.22s ease, box-shadow 0.22s ease, border-color 0.22s ease;
 }
 
-.product-card:hover {
+.product-card:hover,
+.feature-card:hover {
     transform: translateY(-6px);
     border-color: rgba(0, 113, 227, 0.45);
     box-shadow: 0 32px 90px rgba(0, 0, 0, 0.45);
@@ -206,6 +273,15 @@ button:hover,
     transform: translateY(-1px);
 }
 
+.btn-ghost {
+    background: rgba(255, 255, 255, 0.10);
+    border: 1px solid rgba(255, 255, 255, 0.12);
+}
+
+.btn-ghost:hover {
+    background: rgba(255, 255, 255, 0.16);
+}
+
 .flash {
     background: rgba(0, 113, 227, 0.14);
     color: #8ec8ff;
@@ -249,7 +325,33 @@ td {
     text-align: left;
 }
 
+@media (max-width: 900px) {
+    .topbar,
+    header {
+        align-items: flex-start;
+        flex-direction: column;
+    }
+
+    nav {
+        justify-content: flex-start;
+    }
+
+    .features {
+        grid-template-columns: 1fr;
+    }
+}
+
 @media (max-width: 720px) {
+    main {
+        width: min(100% - 28px, 1180px);
+        padding: 34px 0;
+    }
+
+    .hero {
+        padding: 42px 24px;
+        min-height: auto;
+    }
+
     .catalog-head h1,
     .hero h1,
     .hero h2 {
