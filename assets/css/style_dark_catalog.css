@@ -39,20 +39,23 @@ header {
     flex: 0 0 auto;
 }
 
-.logo,
-.brand-logo {
+.logo {
     width: 38px;
     height: 38px;
     border-radius: 11px;
     display: inline-flex;
     align-items: center;
     justify-content: center;
-    object-fit: cover;
+    overflow: hidden;
+    background: #0f0f10;
+    border: 1px solid rgba(255, 255, 255, 0.10);
 }
 
-.logo {
-    background: #ffffff;
-    color: #111111;
+.brand-logo {
+    width: 100%;
+    height: 100%;
+    display: block;
+    object-fit: cover;
 }
 
 nav {
