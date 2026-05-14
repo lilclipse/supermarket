@@ -43,12 +43,13 @@ class BaseTemplate
             <meta charset='UTF-8'>
             <meta name='viewport' content='width=device-width, initial-scale=1.0'>
             <title>{$title}</title>
+            <link rel='icon' type='image/svg+xml' href='/supermarket/assets/img/ovoshnoi-dvizh-logo.svg'>
             <link rel='stylesheet' href='/supermarket/assets/css/style_dark_catalog.css'>
         </head>
         <body>
             <header class='topbar'>
                 <a class='brand' href='/supermarket/index.php'>
-                    <span class='logo'>О</span>
+                    <img class='brand-logo' src='/supermarket/assets/img/ovoshnoi-dvizh-logo.svg' alt='Овощной Движ'>
                     <span>Овощной Движ</span>
                 </a>
 
