@@ -1,151 +1,153 @@
 <?php
-
 namespace App\Controllers;
 
 use App\Configs\Config;
-use App\Services\ProductRepository;
 use App\Views\BaseTemplate;
-use Throwable;
 
 class OrderController
 {
-    public function get(): string
+    public function checkout(): string
     {
-        $cart = $_SESSION['cart'] ?? [];
+        if (!isset($_SESSION['user_id'])) {
+            $_SESSION['flash'] = 'Для оформления заказа необходимо войти в аккаунт.';
+            Config::redirect('login');
+        }
 
-        if (empty($cart)) {
-            $content = "
-                <section class='empty-state'>
-                    <div class='empty-icon'>📦</div>
-                    <h1>Нечего оформлять</h1>
-                    <p>Сначала добавьте товары в корзину.</p>
-                    <a class='btn btn-primary' href='index.php?page=products'>Перейти в каталог</a>
-                </section>
-            ";
-
-            return BaseTemplate::render('Оформление заказа', $content);
+        $basket = $_SESSION['basket'] ?? [];
+        if (empty($basket)) {
+            $_SESSION['flash'] = 'Корзина пуста.';
+            Config::redirect('basket');
         }
 
         if ($_SERVER['REQUEST_METHOD'] === 'POST') {
-            return $this->handleOrder();
+            return $this->saveOrder();
         }
 
         $content = "
-            <section class='section-heading'>
-                <p>Оформление</p>
-                <h1>Данные покупателя</h1>
+            <section class='panel narrow'>
+                <h1>Оформление заказа</h1>
+                <form method='post' class='form'>
+                    <label>ФИО</label>
+                    <input name='customer_name' required placeholder='Иван Иванов'>
+
+                    <label>Телефон</label>
+                    <input name='phone' required placeholder='+7 900 000-00-00'>
+
+                    <label>Email</label>
+                    <input name='email' type='email' required placeholder='mail@example.ru'>
+
+                    <label>Адрес доставки</label>
+                    <textarea name='address' required placeholder='Город, улица, дом, квартира'></textarea>
+
+                    <button class='btn' type='submit'>Подтвердить заказ</button>
+                </form>
             </section>
-
-            <form class='form-card' method='post' action='index.php?page=order'>
-                <label>
-                    ФИО
-                    <input type='text' name='customer_name' placeholder='Иванов Иван Иванович' required>
-                </label>
-
-                <label>
-                    Телефон
-                    <input type='text' name='phone' placeholder='+7 900 000-00-00' required>
-                </label>
-
-                <label>
-                    Email
-                    <input type='email' name='email' placeholder='mail@example.com' required>
-                </label>
-
-                <label>
-                    Адрес доставки
-                    <textarea name='address' placeholder='Город, улица, дом, квартира' required></textarea>
-                </label>
-
-                <button class='btn btn-primary' type='submit'>Подтвердить заказ</button>
-            </form>
         ";
 
         return BaseTemplate::render('Оформление заказа', $content);
     }
 
-    private function handleOrder(): string
+    private function saveOrder(): string
     {
-        $customerName = trim($_POST['customer_name'] ?? '');
-        $phone = trim($_POST['phone'] ?? '');
-        $email = trim($_POST['email'] ?? '');
-        $address = trim($_POST['address'] ?? '');
-        $cart = $_SESSION['cart'] ?? [];
+        $basket = $_SESSION['basket'] ?? [];
+        $pdo = Config::getPDO();
 
-        if ($customerName === '' || $phone === '' || $email === '' || $address === '') {
-            $_SESSION['flash'] = 'Заполните все поля формы.';
-            header('Location: index.php?page=order');
-            exit;
-        }
+        $ids = array_map('intval', array_keys($basket));
+        $placeholders = implode(',', array_fill(0, count($ids), '?'));
 
-        $items = [];
+        $stmt = $pdo->prepare("SELECT * FROM products WHERE id IN ({$placeholders})");
+        $stmt->execute($ids);
+        $products = $stmt->fetchAll();
+
         $total = 0;
+        foreach ($products as $product) {
+            $total += (float)$product['price'] * (int)$basket[$product['id']];
+        }
 
-        foreach ($cart as $id => $quantity) {
-            $product = ProductRepository::find((int)$id);
-            if ($product === null) {
-                continue;
-            }
+        $pdo->beginTransaction();
 
+        $stmt = $pdo->prepare("
+            INSERT INTO orders (user_id, customer_name, phone, email, address, total, status)
+            VALUES (?, ?, ?, ?, ?, ?, 'new')
+        ");
+
+        $stmt->execute([
+            $_SESSION['user_id'],
+            strip_tags($_POST['customer_name']),
+            strip_tags($_POST['phone']),
+            strip_tags($_POST['email']),
+            strip_tags($_POST['address']),
+            $total
+        ]);
+
+        $orderId = $pdo->lastInsertId();
+
+        $itemStmt = $pdo->prepare("
+            INSERT INTO order_items (order_id, product_id, quantity, price, sum_item)
+            VALUES (?, ?, ?, ?, ?)
+        ");
+
+        foreach ($products as $product) {
+            $qty = (int)$basket[$product['id']];
             $price = (float)$product['price'];
-            $sum = $price * (int)$quantity;
-            $total += $sum;
-
-            $items[] = [
-                'product' => $product,
-                'quantity' => (int)$quantity,
-                'price' => $price,
-                'sum' => $sum,
-            ];
+            $itemStmt->execute([
+                $orderId,
+                $product['id'],
+                $qty,
+                $price,
+                $price * $qty
+            ]);
         }
 
-        $orderId = null;
-        $mode = 'Демо-режим: заказ не сохранён в базу, потому что база данных ещё не настроена.';
+        $pdo->commit();
 
-        try {
-            $pdo = Config::getPDO();
-            $pdo->beginTransaction();
+        unset($_SESSION['basket']);
+        $_SESSION['flash'] = 'Заказ успешно оформлен.';
 
-            $stmt = $pdo->prepare('INSERT INTO orders (customer_name, phone, email, address, total_sum, status) VALUES (?, ?, ?, ?, ?, ?)');
-            $stmt->execute([$customerName, $phone, $email, $address, $total, 'Новый']);
-            $orderId = (int)$pdo->lastInsertId();
+        Config::redirect('my_orders');
+    }
 
-            $itemStmt = $pdo->prepare('INSERT INTO order_items (order_id, product_id, quantity, price, sum_price) VALUES (?, ?, ?, ?, ?)');
-
-            foreach ($items as $item) {
-                $itemStmt->execute([
-                    $orderId,
-                    (int)$item['product']['id'],
-                    $item['quantity'],
-                    $item['price'],
-                    $item['sum'],
-                ]);
-            }
-
-            $pdo->commit();
-            $mode = 'Заказ сохранён в базу данных MySQL.';
-        } catch (Throwable $e) {
-            if (isset($pdo) && $pdo->inTransaction()) {
-                $pdo->rollBack();
-            }
+    public function myOrders(): string
+    {
+        if (!isset($_SESSION['user_id'])) {
+            Config::redirect('login');
         }
 
-        unset($_SESSION['cart']);
+        $pdo = Config::getPDO();
+        $stmt = $pdo->prepare("SELECT * FROM orders WHERE user_id = ? ORDER BY id DESC");
+        $stmt->execute([$_SESSION['user_id']]);
+        $orders = $stmt->fetchAll();
 
-        $totalText = number_format($total, 0, ',', ' ');
-        $orderText = $orderId ? "№ {$orderId}" : 'принят';
-        $safeMode = htmlspecialchars($mode, ENT_QUOTES, 'UTF-8');
+        $content = "<section class='panel'><h1>Мои заказы</h1>";
 
-        $content = "
-            <section class='success-state'>
-                <div class='empty-icon'>✅</div>
-                <h1>Заказ {$orderText}</h1>
-                <p>Спасибо, {$customerName}. Итоговая сумма: <strong>{$totalText} ₽</strong>.</p>
-                <p class='hint'>{$safeMode}</p>
-                <a class='btn btn-primary' href='index.php?page=products'>Вернуться в каталог</a>
-            </section>
-        ";
+        if (empty($orders)) {
+            $content .= "<p>У вас пока нет заказов.</p></section>";
+            return BaseTemplate::render('Мои заказы', $content);
+        }
 
-        return BaseTemplate::render('Заказ оформлен', $content);
+        $content .= "<div class='table-wrap'><table><tr><th>№</th><th>Сумма</th><th>Статус</th><th>Дата</th></tr>";
+
+        foreach ($orders as $order) {
+            $sum = number_format((float)$order['total'], 0, '.', ' ');
+            $status = $this->statusName($order['status']);
+            $content .= "<tr><td>{$order['id']}</td><td>{$sum} ₽</td><td>{$status}</td><td>{$order['created_at']}</td></tr>";
+        }
+
+        $content .= "</table></div></section>";
+
+        return BaseTemplate::render('Мои заказы', $content);
+    }
+
+    public function statusName(string $status): string
+    {
+        $names = [
+            'new' => 'Новый',
+            'processing' => 'В обработке',
+            'delivery' => 'Доставляется',
+            'completed' => 'Выполнен',
+            'cancelled' => 'Отменён'
+        ];
+
+        return $names[$status] ?? $status;
     }
 }

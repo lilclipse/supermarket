@@ -1,60 +1,54 @@
 <?php
-
 namespace App\Controllers;
 
-use App\Views\BaseTemplate;
 use App\Configs\Config;
+use App\Views\BaseTemplate;
 
 class ProductController
 {
-    public function get(): string
+    public function index(): string
     {
         $pdo = Config::getPDO();
-        $stmt = $pdo->query("SELECT * FROM products");
+        $stmt = $pdo->query('SELECT * FROM products WHERE is_deleted = 0 ORDER BY id DESC');
         $products = $stmt->fetchAll();
 
         $icons = [
-            "Молочные продукты" => "🥛",
-            "Выпечка" => "🍞",
-            "Фрукты" => "🍎",
-            "Мясо и птица" => "🍗",
-            "Овощи" => "🥔",
-            "Напитки" => "🧃",
-            "Бакалея" => "🍝"
+            'Молочные продукты' => '🥛',
+            'Выпечка' => '🍞',
+            'Фрукты' => '🍎',
+            'Мясо и птица' => '🍗',
+            'Овощи' => '🥔',
+            'Напитки' => '🧃',
+            'Бакалея' => '🍝'
         ];
 
-        $content = "<section class='catalog'>";
-        $content .= "<h2>Каталог продуктов</h2>";
-        $content .= "<div class='products'>";
+        $content = "<section class='catalog-head'><h1>Каталог продуктов</h1><p>Выберите товары и добавьте их в корзину.</p></section>";
+        $content .= "<section class='products'>";
 
         foreach ($products as $product) {
-            $name = htmlspecialchars($product['name']);
-            $category = htmlspecialchars($product['category']);
-            $description = htmlspecialchars($product['description']);
-            $price = number_format($product['price'], 0, '.', ' ');
-            $icon = $icons[$product['category']] ?? "🛒";
+            $id = (int)$product['id'];
+            $name = BaseTemplate::escape($product['name']);
+            $category = BaseTemplate::escape($product['category']);
+            $description = BaseTemplate::escape($product['description']);
+            $price = number_format((float)$product['price'], 0, '.', ' ');
+            $icon = $icons[$product['category']] ?? '🛒';
 
             $content .= "
-                <div class='product-card'>
-                    <div class='product-preview'>
-                        <span>{$icon}</span>
-                    </div>
-
-                    <div class='product-category'>{$category}</div>
+                <article class='product-card'>
+                    <div class='product-preview'><span>{$icon}</span></div>
+                    <span class='tag'>{$category}</span>
                     <h3>{$name}</h3>
                     <p>{$description}</p>
-
                     <div class='product-bottom'>
                         <strong>{$price} ₽</strong>
-                        <a class='btn' href='/supermarket/index.php?page=basket_add&id={$product['id']}'>В корзину</a>
+                        <a class='btn' href='/supermarket/index.php?page=basket_add&id={$id}'>В корзину</a>
                     </div>
-                </div>
+                </article>
             ";
         }
 
-        $content .= "</div>";
         $content .= "</section>";
 
-        return BaseTemplate::render("Каталог", $content);
+        return BaseTemplate::render('Каталог', $content);
     }
 }

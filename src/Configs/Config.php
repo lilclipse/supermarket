@@ -1,15 +1,14 @@
 <?php
-
 namespace App\Configs;
 
 use PDO;
 
 class Config
 {
-    public const DB_HOST = 'localhost';
-    public const DB_NAME = 'supermarket';
-    public const DB_USER = 'root';
-    public const DB_PASS = '';
+    const DB_HOST = 'localhost';
+    const DB_NAME = 'supermarket';
+    const DB_USER = 'root';
+    const DB_PASS = '';
 
     public static function getPDO(): PDO
     {
@@ -17,7 +16,22 @@ class Config
 
         return new PDO($dsn, self::DB_USER, self::DB_PASS, [
             PDO::ATTR_ERRMODE => PDO::ERRMODE_EXCEPTION,
-            PDO::ATTR_DEFAULT_FETCH_MODE => PDO::FETCH_ASSOC,
+            PDO::ATTR_DEFAULT_FETCH_MODE => PDO::FETCH_ASSOC
         ]);
+    }
+
+    public static function siteUrl(string $page = ''): string
+    {
+        if ($page === '') {
+            return '/supermarket/index.php';
+        }
+
+        return '/supermarket/index.php?page=' . urlencode($page);
+    }
+
+    public static function redirect(string $page = ''): void
+    {
+        header('Location: ' . self::siteUrl($page));
+        exit;
     }
 }

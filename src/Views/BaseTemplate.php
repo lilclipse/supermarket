@@ -1,57 +1,81 @@
 <?php
-
 namespace App\Views;
 
 class BaseTemplate
 {
     public static function render(string $title, string $content): string
     {
-        $cartCount = 0;
-        if (isset($_SESSION['cart']) && is_array($_SESSION['cart'])) {
-            $cartCount = array_sum($_SESSION['cart']);
+        $username = $_SESSION['username'] ?? null;
+        $role = $_SESSION['role'] ?? null;
+        $basketCount = array_sum($_SESSION['basket'] ?? []);
+        $flash = $_SESSION['flash'] ?? null;
+        unset($_SESSION['flash']);
+
+        $authLinks = '';
+
+        if ($username === null) {
+            $authLinks = "
+                <a href='/supermarket/index.php?page=login'>Вход</a>
+                <a class='nav-pill' href='/supermarket/index.php?page=register'>Регистрация</a>
+            ";
+        } else {
+            if ($role === 'admin') {
+                $authLinks .= "<a href='/supermarket/index.php?page=admin'>Админ-панель</a>";
+            } else {
+                $authLinks .= "<a href='/supermarket/index.php?page=my_orders'>Мои заказы</a>";
+            }
+
+            $authLinks .= "
+                <span class='user-chip'>{$username}</span>
+                <a class='nav-pill nav-pill-dark' href='/supermarket/index.php?page=logout'>Выход</a>
+            ";
         }
 
-        $flash = '';
-        if (isset($_SESSION['flash'])) {
-            $message = htmlspecialchars($_SESSION['flash'], ENT_QUOTES, 'UTF-8');
-            $flash = "<div class='flash'>{$message}</div>";
-            unset($_SESSION['flash']);
+        $flashHtml = '';
+        if ($flash) {
+            $flashHtml = "<div class='flash'>{$flash}</div>";
         }
 
-        return "<!DOCTYPE html>
-<html lang='ru'>
-<head>
-    <meta charset='UTF-8'>
-    <meta name='viewport' content='width=device-width, initial-scale=1.0'>
-    <title>{$title}</title>
-    <link rel='stylesheet' href='assets/css/style.css'>
-</head>
-<body>
-    <header class='site-header'>
-        <a class='logo' href='index.php'>
-            <span class='logo-mark'>S</span>
-            <span>Supermarket</span>
-        </a>
+        return "
+        <!DOCTYPE html>
+        <html lang='ru'>
+        <head>
+            <meta charset='UTF-8'>
+            <meta name='viewport' content='width=device-width, initial-scale=1.0'>
+            <title>{$title}</title>
+            <link rel='stylesheet' href='/supermarket/assets/css/style.css'>
+        </head>
+        <body>
+            <header class='topbar'>
+                <a class='brand' href='/supermarket/index.php'>
+                    <span class='logo'>S</span>
+                    <span>Supermarket</span>
+                </a>
 
-        <nav class='nav'>
-            <a href='index.php'>Главная</a>
-            <a href='index.php?page=products'>Каталог</a>
-            <a href='index.php?page=basket'>Корзина <span class='badge'>{$cartCount}</span></a>
-            <a href='index.php?page=about'>О проекте</a>
-        </nav>
-    </header>
+                <nav>
+                    <a href='/supermarket/index.php'>Главная</a>
+                    <a href='/supermarket/index.php?page=products'>Каталог</a>
+                    <a href='/supermarket/index.php?page=basket'>Корзина <span class='count'>{$basketCount}</span></a>
+                    <a href='/supermarket/index.php?page=about'>О проекте</a>
+                    {$authLinks}
+                </nav>
+            </header>
 
-    {$flash}
+            <main>
+                {$flashHtml}
+                {$content}
+            </main>
 
-    <main class='page'>
-        {$content}
-    </main>
+            <footer>
+                <p>© 2026 ИС «Супермаркет». Учебный проект.</p>
+            </footer>
+        </body>
+        </html>
+        ";
+    }
 
-    <footer class='footer'>
-        <span>© 2026 ИС «Супермаркет»</span>
-        <span>Учебный PHP MVC-проект</span>
-    </footer>
-</body>
-</html>";
+    public static function escape(?string $value): string
+    {
+        return htmlspecialchars((string)$value, ENT_QUOTES, 'UTF-8');
     }
 }
