@@ -24,7 +24,7 @@ class BaseTemplate
     <meta charset='UTF-8'>
     <meta name='viewport' content='width=device-width, initial-scale=1.0'>
     <title>{$title}</title>
-    <link rel='stylesheet' href='assets/css/style.css'>
+    <link rel='stylesheet' href='assets/css/style_dark_toggle.css'>
 </head>
 <body>
     <header class='site-header'>
@@ -38,6 +38,7 @@ class BaseTemplate
             <a href='index.php?page=products'>Каталог</a>
             <a href='index.php?page=basket'>Корзина <span class='badge'>{$cartCount}</span></a>
             <a href='index.php?page=about'>О проекте</a>
+            <button id='theme-toggle' style='margin-left:20px; padding:6px 12px; border-radius:8px; cursor:pointer;'>🌙/☀️</button>
         </nav>
     </header>
 
@@ -51,6 +52,8 @@ class BaseTemplate
         <span>© 2026 ИС «Супермаркет»</span>
         <span>Учебный PHP MVC-проект</span>
     </footer>
+
+    <script src='src/Views/theme_toggle.js'></script>
 </body>
 </html>";
     }
