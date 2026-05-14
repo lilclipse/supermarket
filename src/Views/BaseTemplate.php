@@ -48,8 +48,8 @@ class BaseTemplate
         <body>
             <header class='topbar'>
                 <a class='brand' href='/supermarket/index.php'>
-                    <span class='logo'>S</span>
-                    <span>Supermarket</span>
+                    <span class='logo'>О</span>
+                    <span>Овощной Движ</span>
                 </a>
 
                 <nav>
@@ -67,7 +67,7 @@ class BaseTemplate
             </main>
 
             <footer>
-                <p>© 2026 ИС «Супермаркет». Учебный проект.</p>
+                <p>© 2026 ИС «Овощной Движ». Учебный проект.</p>
             </footer>
         </body>
         </html>
