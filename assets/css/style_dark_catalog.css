@@ -39,15 +39,20 @@ header {
     flex: 0 0 auto;
 }
 
-.logo {
-    width: 32px;
-    height: 32px;
-    border-radius: 9px;
-    background: #ffffff;
-    color: #111111;
+.logo,
+.brand-logo {
+    width: 38px;
+    height: 38px;
+    border-radius: 11px;
     display: inline-flex;
     align-items: center;
     justify-content: center;
+    object-fit: cover;
+}
+
+.logo {
+    background: #ffffff;
+    color: #111111;
 }
 
 nav {
