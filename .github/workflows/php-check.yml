@@ -20,6 +20,5 @@ jobs:
           php-version: '8.2'
 
       - name: Check PHP syntax
-  run: |
-    echo "Демонстрация ошибочного запуска CI/CD"
-    exit 1
+        run: |
+          find . -type f -name "*.php" -not -path "./vendor/*" -print0 | xargs -0 -n1 php -l
